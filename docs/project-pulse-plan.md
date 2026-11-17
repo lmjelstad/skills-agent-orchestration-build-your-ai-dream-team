@@ -1,5 +1,12 @@
 # Project Pulse implementation plan
 
+## At a glance
+
+- **Sequence:** Agree on the interface contract → implement the page, data, and design → integrate and verify.
+- **Dependency:** Implementation starts after the shared fields and presentation hooks are agreed; integration starts after all implementation files are ready.
+- **Parallel work:** After the contract is fixed, Designer owns `app/styles.css`; Coder owns `app/index.html`, `app/project-data.json`, and `.vscode/launch.json`.
+- **Validation:** Check required files and content, parse both JSON files, run repository acceptance checks, then verify runtime, responsive behavior, and accessibility.
+
 ## Goal
 
 Build a lightweight, static Project Pulse dashboard that helps contributors scan project names, owners, status, recent activity, priority or risk, and a short summary. Use the existing brief in `.github/project-pulse-brief.md` as the product requirements. The app should open as a dashboard page, not a directory listing, from the VS Code **Run Project Pulse Dashboard** launch configuration.
@@ -12,14 +19,17 @@ Build a lightweight, static Project Pulse dashboard that helps contributors scan
 - Assume a dependency-free static app using HTML, CSS, JSON, and browser JavaScript. Keep the requested file set; do not introduce a build tool or package manifest.
 - Use the brief's required JSON fields and include a concise `summary` per project to meet its contributor-friendly-summary goal.
 
-## Ordered work and file assignments
+## Ordering
+
+Work proceeds in three steps: first agree on the interface contract, then implement the assigned files, and finally integrate and verify the assembled app. Integration and runtime verification happen after implementation, not alongside it.
+
+## Work steps and file assignments
 
 ### 1. Agree on the interface contract
 
 - **Owner:** Orchestrator, with Designer and Coder.
 - Confirm the content model: top-level `projects` array; each object has `name`, `owner`, `status`, `recentActivity`, and `priority`, plus `summary`.
 - Confirm stable presentation hooks before implementation: `.dashboard`, `.project-list`, `.project-card`, and a status/priority badge hook. Keep field names consistent between data and rendering.
-- **Dependency:** Complete before the parallel implementation below. This avoids separate interpretations of the UI/data contract.
 
 ### 2. Implement the page, data, and visual design in parallel
 
@@ -27,19 +37,23 @@ Build a lightweight, static Project Pulse dashboard that helps contributors scan
 - **Coder — `app/index.html`:** Create a semantic page with the exact title **Project Pulse**, a clear page heading, stylesheet reference, and a project-list container. Load `project-data.json`, render one visible `.project-card` per project, and display each required field and summary. Include meaningful loading, empty, and error states; insert untrusted JSON strings as text rather than HTML.
 - **Coder — `app/project-data.json`:** Create representative, useful project records under a top-level `projects` array. Populate every required field and `summary`; use consistent status and priority labels.
 - **Coder — `.vscode/launch.json`:** Create strict JSON with a **Run Project Pulse Dashboard** configuration. Set `cwd` to `${workspaceFolder}/app`, run `python3 -m http.server 5500`, and use a server-ready action that opens `http://localhost:%s/index.html`.
-- **Dependency:** All work follows the Step 1 interface contract. Designer and Coder may work in parallel because their assigned files do not overlap and the shared class/data contracts are fixed first.
 
 ### 3. Integrate and verify
 
 - **Owners:** Coder integrates; Designer checks visual/accessibility outcomes; Orchestrator checks the complete result.
 - Verify that HTML references the stylesheet and JSON data, and that data keys map to the fields rendered on cards. Adjust the page or styling if the rendered structure diverges from the agreed contract.
-- **Dependency:** Requires all implementation files to be present. Integration and runtime verification are sequential after parallel implementation because they validate the assembled app and launch behavior.
 
-## Parallel and sequential decisions
+## Dependencies
 
-- **Parallel:** After agreeing on field names and CSS hooks, Designer can implement only `app/styles.css` while Coder creates `app/index.html`, `app/project-data.json`, and `.vscode/launch.json`. Separate file ownership prevents edit conflicts; the shared contract prevents integration drift.
-- **Sequential:** Agree on the contract first; integrate and run checks only after the parallel file work is complete. Browser checks depend on the page, data, and styling being connected, and launch verification depends on the configuration and app files existing.
-- Keep Coder's ownership of HTML/data/launch explicit and Designer's stylesheet ownership exclusive. Orchestrator coordinates but does not edit implementation files.
+Prerequisite relationships between the work steps:
+
+- **Step 1 → Step 2:** The interface contract (data fields and presentation hooks) must be agreed before implementation begins; both the page and stylesheet depend on that shared contract.
+- **Step 2 → Step 3:** Integration depends on all four assigned implementation files being present: `app/index.html`, `app/styles.css`, `app/project-data.json`, and `.vscode/launch.json`.
+- **Step 3 validation dependencies:** Browser checks depend on the page, data, and styling being connected. Launch verification depends on the launch configuration and app files existing.
+
+## Parallel work
+
+Within Step 2, Designer can implement only `app/styles.css` while Coder creates `app/index.html`, `app/project-data.json`, and `.vscode/launch.json`. This work is parallel because the assigned files do not overlap; the shared interface contract must be fixed first to prevent integration drift. Keep Coder's ownership of HTML/data/launch explicit and Designer's stylesheet ownership exclusive. Orchestrator coordinates but does not edit implementation files.
 
 ## Edge cases and risks
 
