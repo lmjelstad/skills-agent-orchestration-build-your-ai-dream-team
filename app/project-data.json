@@ -1,0 +1,36 @@
+{
+  "projects": [
+    {
+      "name": "Atlas",
+      "owner": "Mona Patel",
+      "status": "On track",
+      "recentActivity": "Completed the account settings review",
+      "priority": "High",
+      "summary": "Modernizing account management for a simpler contributor experience."
+    },
+    {
+      "name": "Beacon",
+      "owner": "Jordan Lee",
+      "status": "In progress",
+      "recentActivity": "Published the first accessibility audit findings",
+      "priority": "Medium",
+      "summary": "Improving accessibility across the product and documenting reusable patterns."
+    },
+    {
+      "name": "Compass",
+      "owner": "Riley Chen",
+      "status": "Needs attention",
+      "recentActivity": "Waiting on the data migration review",
+      "priority": "High",
+      "summary": "Preparing the reporting service for its next-generation data pipeline."
+    },
+    {
+      "name": "Drift",
+      "owner": "Sam Rivera",
+      "status": "On track",
+      "recentActivity": "Shipped the updated onboarding checklist",
+      "priority": "Low",
+      "summary": "Helping new team members get productive with a clearer onboarding flow."
+    }
+  ]
+}

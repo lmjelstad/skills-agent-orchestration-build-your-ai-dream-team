@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="dashboard-header">
+        <p class="eyebrow">Team overview</p>
+        <h1>Project Pulse</h1>
+        <p>See what teams are working on and what needs attention.</p>
+      </header>
+
+      <section aria-labelledby="projects-heading">
+        <div class="section-heading">
+          <h2 id="projects-heading">Projects</h2>
+        </div>
+        <p id="project-message" role="status" aria-live="polite">Loading projects…</p>
+        <button id="retry-button" type="button" hidden>Try again</button>
+        <div id="project-list" class="project-list" aria-busy="true"></div>
+      </section>
+    </main>
+
+    <script>
+      const projectList = document.querySelector("#project-list");
+      const projectMessage = document.querySelector("#project-message");
+      const retryButton = document.querySelector("#retry-button");
+
+      function projectText(value, fallback = "Not provided") {
+        return typeof value === "string" && value.trim() ? value : fallback;
+      }
+
+      function addDetail(list, label, value) {
+        const term = document.createElement("dt");
+        term.textContent = label;
+        const description = document.createElement("dd");
+        description.textContent = value;
+        list.append(term, description);
+      }
+
+      function renderProjects(projects) {
+        projectList.replaceChildren();
+
+        for (const project of projects) {
+          const record = project && typeof project === "object" ? project : {};
+          const card = document.createElement("article");
+          card.className = "project-card";
+
+          const heading = document.createElement("h3");
+          heading.textContent = projectText(record.name, "Untitled project");
+
+          const badges = document.createElement("div");
+          badges.className = "project-badges";
+
+          const status = document.createElement("span");
+          status.className = "project-status";
+          status.textContent = projectText(record.status);
+
+          const priority = document.createElement("span");
+          priority.className = "project-priority";
+          priority.textContent = `Priority: ${projectText(record.priority)}`;
+          badges.append(status, priority);
+
+          const details = document.createElement("dl");
+          addDetail(details, "Owner", projectText(record.owner));
+          addDetail(details, "Recent activity", projectText(record.recentActivity));
+          addDetail(details, "Summary", projectText(record.summary, "No summary provided."));
+
+          card.append(heading, badges, details);
+          projectList.append(card);
+        }
+
+        projectMessage.hidden = true;
+        retryButton.hidden = true;
+        projectList.setAttribute("aria-busy", "false");
+      }
+
+      async function loadProjects() {
+        projectList.replaceChildren();
+        projectList.setAttribute("aria-busy", "true");
+        projectMessage.textContent = "Loading projects…";
+        projectMessage.hidden = false;
+        retryButton.hidden = true;
+
+        try {
+          const response = await fetch("project-data.json");
+          if (!response.ok) {
+            throw new Error(`Request failed with status ${response.status}`);
+          }
+
+          const data = await response.json();
+          if (!data || !Array.isArray(data.projects)) {
+            throw new Error("Project data must contain a projects array.");
+          }
+
+          if (data.projects.length === 0) {
+            projectMessage.textContent = "No projects to show yet.";
+            projectList.setAttribute("aria-busy", "false");
+            return;
+          }
+
+          renderProjects(data.projects);
+        } catch {
+          projectMessage.textContent = "Projects couldn’t be loaded. Check your connection and try again.";
+          retryButton.hidden = false;
+          projectList.setAttribute("aria-busy", "false");
+        }
+      }
+
+      retryButton.addEventListener("click", loadProjects);
+      loadProjects();
+    </script>
+  </body>
+</html>
